@@ -81,7 +81,7 @@ try:
     # Descomente as linhas abaixo para usar o Git
     repo = Repo(repo_dir)
     repo.git.add(r'\home\ubuntu\inpasa-pagamentos\detalhamento_pagamentos.pdf')
-    repo.index.commit('chore: Ajusta posição da legenda para melhor visualização')
+    repo.index.commit('chore: Relatório de Pagamentos atualizado')
     origin = repo.remote(name='origin')
     origin.push()
     print("Arquivo enviado para o GitHub com sucesso!")
