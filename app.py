@@ -1,6 +1,8 @@
 import pandas as pd
 from fpdf import FPDF
 from wrapper import DataWrapper
+from git import Repo
+
 
 data = DataWrapper.get_reports_pagamentos()
 
@@ -69,4 +71,21 @@ pdf.cell(col_widths[3], 6, f"R$ {total_eletronico:,.2f}".replace(",", "v").repla
 pdf.cell(col_widths[4], 6, f"R$ {total_geral:,.2f}".replace(",", "v").replace(".", ",").replace("v", "."), border=1, align='R')
 
 # Salvar
-pdf.output("relatorio_pagamentos_estilo_excel.pdf")
+pdf.output(r"\home\ubuntu\inpasa-pagamentos\detalhamento_pagamentos.pdf")
+
+# Caminho onde o repositório está clonado
+repo_dir = r'\home\ubuntu\inpasa-pagamentos'  # <=== altere aqui
+
+# Bloco do Git (mantido como no original)
+try:
+    # Descomente as linhas abaixo para usar o Git
+    repo = Repo(repo_dir)
+    repo.git.add(r'\home\ubuntu\inpasa-pagamentos\detalhamento_pagamentos.pdf')
+    repo.index.commit('chore: Ajusta posição da legenda para melhor visualização')
+    origin = repo.remote(name='origin')
+    origin.push()
+    print("Arquivo enviado para o GitHub com sucesso!")
+except Exception as e:
+    print(f"Erro ao enviar para o GitHub: {e}")
+
+print('✅ Relatorio Gerado!')
