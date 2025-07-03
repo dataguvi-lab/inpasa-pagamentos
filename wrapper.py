@@ -1,13 +1,8 @@
-import os
 import appconfig as cfg
 import pandas as pd
 import logging
-import json
 from dotenv import load_dotenv
 from conn_pstg import start_connection_datalake, start_connection_datatalk
-import pytz
-from datetime import datetime
-
 
 load_dotenv()
 logger = logging.getLogger(cfg.APP_NAME)
