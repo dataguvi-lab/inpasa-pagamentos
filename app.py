@@ -184,10 +184,10 @@ pdf.output(output_path)
 repo_dir = r"\home\ubuntu\inpasa-pagamentos"
 try:
     # Descomente para usar
-    # repo = Repo(repo_dir)
-    # repo.git.add(r'detalhamento_pagamentos.pdf')
-    # repo.index.commit('chore: Relatório de Pagamentos atualizado')
-    # repo.remote(name='origin').push()
+    repo = Repo(repo_dir)
+    repo.git.add(r'detalhamento_pagamentos.pdf')
+    repo.index.commit('chore: Relatório de Pagamentos atualizado')
+    repo.remote(name='origin').push()
     print("Arquivo enviado para o GitHub com sucesso!")
 except Exception as e:
     print(f"Erro ao enviar para o GitHub: {e}")
