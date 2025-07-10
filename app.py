@@ -6,6 +6,7 @@ from git import Repo
 
 data = DataWrapper.get_reports_pagamentos()
 
+date_venc = DataWrapper.get_data_venc()
 
 df = pd.DataFrame(data)
 
@@ -17,7 +18,7 @@ total_eletronico = df["eletronico"].sum()
 total_geral = df["total"].sum()
 
 # Colunas ajustadas
-col_widths = [70, 40, 30, 30, 30]
+col_widths = [70, 50, 26, 26, 26]
 col_names = ["Fornecedor", "G.E.F.", "Manual", "Eletrônico", "Total"]
 x_inicio = (210 - sum(col_widths)) / 2
 
@@ -27,7 +28,7 @@ class PDF(FPDF):
         # Imagem (ajuste conforme o caminho e o tamanho necessário)
         self.image("logo.png", 10, 2, 20)  # x, y, largura
         self.set_font("Arial", "B", 10)
-        self.cell(0, 10, "Relatório de Pagamentos", align="C", ln=True)
+        self.cell(0, 10, f"Detalhamento de Pagamentos - {date_venc}", align="C", ln=True)
         self.ln(5)
 
 pdf = PDF()
@@ -70,20 +71,21 @@ pdf.cell(col_widths[2], 6, f"R$ {total_manual:,.2f}".replace(",", "v").replace("
 pdf.cell(col_widths[3], 6, f"R$ {total_eletronico:,.2f}".replace(",", "v").replace(".", ",").replace("v", "."), border=1, align='R')
 pdf.cell(col_widths[4], 6, f"R$ {total_geral:,.2f}".replace(",", "v").replace(".", ",").replace("v", "."), border=1, align='R')
 
-# Salvar
-pdf.output(r"\home\ubuntu\inpasa-pagamentos\detalhamento_pagamentos.pdf")
+# Salvar PDF
+output_path = r"C:\home\ubuntu\inpasa-pagamentos\detalhamento_pagamentos.pdf"
+pdf.output(output_path)
 
-# Caminho onde o repositório está clonado
-repo_dir = r'\home\ubuntu\inpasa-pagamentos'  # <=== altere aqui
+# Enviar para Git (opcional)
+repo_dir = r"C:\home\ubuntu\inpasa-pagamentos"  # <=== altere aqui
 
 # Bloco do Git (mantido como no original)
 try:
     # Descomente as linhas abaixo para usar o Git
-    repo = Repo(repo_dir)
-    repo.git.add(r'\home\ubuntu\inpasa-pagamentos\detalhamento_pagamentos.pdf')
-    repo.index.commit('chore: Relatório de Pagamentos atualizado')
-    origin = repo.remote(name='origin')
-    origin.push()
+    #repo = Repo(repo_dir)
+    #repo.git.add(r'\home\ubuntu\inpasa-pagamentos\detalhamento_pagamentos.pdf')
+    #repo.index.commit('chore: Relatório de Pagamentos atualizado')
+    #origin = repo.remote(name='origin')
+    #origin.push()
     print("Arquivo enviado para o GitHub com sucesso!")
 except Exception as e:
     print(f"Erro ao enviar para o GitHub: {e}")

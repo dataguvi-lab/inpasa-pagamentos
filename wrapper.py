@@ -15,3 +15,10 @@ class DataWrapper:
         df = pd.read_sql_query(cfg.QUERY_PAGAMENTO, conn)
         df = pd.DataFrame(df)
         return df
+    
+    @staticmethod
+    def get_data_venc():
+        conn = start_connection_datalake()           
+        df = pd.read_sql_query(cfg.QUERY_DATA_VENCIMENTO, conn)
+        df = pd.DataFrame(df)
+        return df
