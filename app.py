@@ -177,11 +177,11 @@ pdf.cell(col_widths[3], 6, val_total_manual, border=1, align='R')
 pdf.cell(col_widths[4], 6, val_total_geral, border=1, align='R')
 
 # 11. Salvar PDF
-output_path = r"C:\home\ubuntu\inpasa-pagamentos\detalhamento_pagamentos.pdf"
+output_path = r"\home\ubuntu\inpasa-pagamentos\detalhamento_pagamentos.pdf"
 pdf.output(output_path)
 
 # 12. Enviar para o Git (opcional)
-repo_dir = r"C:\home\ubuntu\inpasa-pagamentos"
+repo_dir = r"\home\ubuntu\inpasa-pagamentos"
 try:
     # Descomente para usar
     # repo = Repo(repo_dir)
