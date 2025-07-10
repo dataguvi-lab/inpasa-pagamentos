@@ -1,15 +1,28 @@
-QUERY_PAGAMENTO = """select dp.fornecedor,
-REGEXP_REPLACE(dp.empresa, '^.*INPASA[ ]*', '') AS "G.E.F.",
-sum(case 
-	when dp.cod_tipopagamento = 1 then dp.valorparcela 
-end) as manual,
-sum(case 
-	when dp.cod_tipopagamento = 7 then dp.valorparcela
-end) as eletronico
-from financeiro.detalhamento_pagamento dp
-where dp.datavcto = current_date
-group by dp.fornecedor, dp.empresa
-order by dp.empresa"""
+QUERY_PAGAMENTO = """with valores as (
+	SELECT 
+    dp.fornecedor,
+    REGEXP_REPLACE(dp.empresa, '^.*INPASA[ ]*', '') AS "G.E.F.",
+    SUM(dp.valorparcela) AS eletronico,
+    NULL AS manual,
+    1 AS tipo_ordem
+FROM financeiro.detalhamento_pagamento dp
+WHERE dp.datavcto = CURRENT_DATE
+  AND dp.cod_tipopagamento = 7
+GROUP BY dp.fornecedor, dp.empresa
+UNION ALL
+SELECT 
+    dp.fornecedor,
+    REGEXP_REPLACE(dp.empresa, '^.*INPASA[ ]*', '') AS "G.E.F.",
+    NULL AS eletronico,
+    SUM(dp.valorparcela) AS manual,
+    2 AS tipo_ordem
+FROM financeiro.detalhamento_pagamento dp
+WHERE dp.datavcto = CURRENT_DATE
+  AND dp.cod_tipopagamento = 1
+GROUP BY dp.fornecedor, dp.empresa
+ORDER BY tipo_ordem, "G.E.F." asc, eletronico asc, manual asc
+)
+select fornecedor, "G.E.F.", eletronico, manual  from valores"""
 
 QUERY_DATA_VENCIMENTO = """SELECT TO_CHAR(MAX(dp.datavcto), 'DD/MM/YYYY') AS data_maxima
 FROM financeiro.detalhamento_pagamento dp"""
