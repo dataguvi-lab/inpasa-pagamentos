@@ -45,12 +45,12 @@ col_names = ["Fornecedor", "G.E.F.", "Eletrônico", "Manual", "Total"]
 x_inicio = (210 - sum(col_widths)) / 2
 
 # Layout para tabela de G.E.F.
-col_widths_gef = [80, 40, 40, 40]
+col_widths_gef = [70, 50, 42, 36]
 col_names_gef = ["G.E.F.", "Eletrônico", "Manual", "Total"]
 x_inicio_gef = (210 - sum(col_widths_gef)) / 2
 
 # Layout para tabela de Empenho
-col_widths_empenho = [50, 50, 35, 35, 35]
+col_widths_empenho = [70, 50, 26, 26, 26]
 col_names_empenho = ["Empenho", "G.E.F.", "Eletrônico", "Manual", "Total"]
 x_inicio_empenho = (210 - sum(col_widths_empenho)) / 2
 
@@ -127,7 +127,7 @@ class PDF(FPDF):
         # Background sutil para o cabeçalho da tabela
         self.set_fill_color(245, 246, 247)
         
-        self.set_font("Arial", '', 9)
+        self.set_font("Arial", 'B', 9)
         self.set_text_color(51, 51, 51)
         self.set_x(x_inicio)
         
@@ -144,7 +144,7 @@ class PDF(FPDF):
         # Background sutil para o cabeçalho da tabela
         self.set_fill_color(245, 246, 247)
         
-        self.set_font("Arial", '', 9)
+        self.set_font("Arial", 'B', 9)
         self.set_text_color(51, 51, 51)
         self.set_x(x_inicio_gef)
         
@@ -161,7 +161,7 @@ class PDF(FPDF):
         # Background sutil para o cabeçalho da tabela
         self.set_fill_color(245, 246, 247)
         
-        self.set_font("Arial", '', 9)
+        self.set_font("Arial", 'B', 9)
         self.set_text_color(51, 51, 51)
         self.set_x(x_inicio_empenho)
         
@@ -214,21 +214,23 @@ for _, row in df.iterrows():
 
     # Formatando 'eletronico' com segurança
     try:
-        val_eletronico = f"R$ {float(row['eletronico']):,.2f}".replace(",", "v").replace(".", ",").replace("v", ".")
+        eletronico_val_det_forn = float(row['eletronico'])
+        val_eletronico = f"R$ {float(row['eletronico']):,.2f}".replace(",", "v").replace(".", ",").replace("v", ".") if eletronico_val_det_forn > 0 else ""
     except (ValueError, TypeError):
         val_eletronico = ""
     pdf.cell(col_widths[2], cell_height, val_eletronico, border=1, align='R')
 
     # Formatando 'manual' com segurança
     try:
-        val_manual = f"R$ {float(row['manual']):,.2f}".replace(",", "v").replace(".", ",").replace("v", ".")
+        manual_val_det_form = float(row['manual'])
+        val_manual = f"R$ {float(row['manual']):,.2f}".replace(",", "v").replace(".", ",").replace("v", ".") if manual_val_det_form > 0 else ""
     except (ValueError, TypeError):
         val_manual = ""
     pdf.cell(col_widths[3], cell_height, val_manual, border=1, align='R')
 
     # Formatando 'total'
-    val_total = f"R$ {row['total']:,.2f}".replace(",", "v").replace(".", ",").replace("v", ".")
-    pdf.cell(col_widths[4], cell_height, val_total, border=1, align='R')
+    #val_total = f"R$ {row['total']:,.2f}".replace(",", "v").replace(".", ",").replace("v", ".")
+    pdf.cell(col_widths[4], cell_height, " ", border=1, align='R')
 
     pdf.ln()
 
@@ -240,7 +242,7 @@ if pdf.get_y() > 250:
 pdf.ln(2)
 pdf.set_font("Arial", 'B', 8)
 pdf.set_x(x_inicio)
-pdf.cell(col_widths[0] + col_widths[1], 6, "Totais", border=1, align='R')
+pdf.cell(col_widths[0] + col_widths[1], 6, "TOTAL GERAL", border=1, align='R')
 
 val_total_eletronico = f"R$ {total_eletronico:,.2f}".replace(",", "v").replace(".", ",").replace("v", ".")
 val_total_manual = f"R$ {total_manual:,.2f}".replace(",", "v").replace(".", ",").replace("v", ".")
@@ -249,6 +251,79 @@ val_total_geral = f"R$ {total_geral:,.2f}".replace(",", "v").replace(".", ",").r
 pdf.cell(col_widths[2], 6, val_total_eletronico, border=1, align='R')
 pdf.cell(col_widths[3], 6, val_total_manual, border=1, align='R')
 pdf.cell(col_widths[4], 6, val_total_geral, border=1, align='R')
+
+# 14. NOVA SEÇÃO: Resumo por Empenho
+pdf.ln(8)
+pdf.add_section_title("RESUMO POR EMPENHO")
+
+# Verificar se precisa de nova página para a seção Empenho
+if pdf.get_y() > 180:  # Deixar espaço suficiente para a nova seção
+    pdf.add_page()
+    pdf.add_section_title("RESUMO POR EMPENHO")
+
+pdf.add_empenho_table_header()
+
+# 15. Conteúdo da tabela de Empenho
+pdf.set_font("Arial", '', 8)
+for _, row in df_group_empenho.iterrows():
+    # Verificar se precisa de nova página
+    if pdf.get_y() > 250:
+        pdf.add_page()
+        pdf.add_empenho_table_header()
+    
+    pdf.set_x(x_inicio_empenho)
+    
+    # Empenho (truncar se muito longo)
+    #empenho_text = str(row['empenho'])[:20] + "..." if len(str(row['empenho'])) > 20 else str(row['empenho'])
+    empenho_text = str(row['empenho'])
+    pdf.cell(col_widths_empenho[0], 6, empenho_text, border=1, align='L')
+    
+    # G.E.F. (truncar se muito longo)
+    #gef_text = str(row['G.E.F.'])[:20] + "..." if len(str(row['G.E.F.'])) > 20 else str(row['G.E.F.'])
+    gef_text = str(row['G.E.F.'])
+    pdf.cell(col_widths_empenho[1], 6, gef_text, border=1, align='C')
+    
+    # Eletrônico
+    try:
+        eletronico_val_emp = float(row['eletronico'])
+        val_eletronico = f"R$ {float(row['eletronico']):,.2f}".replace(",", "v").replace(".", ",").replace("v", ".") if eletronico_val_emp > 0 else ""
+    except (ValueError, TypeError):
+        val_eletronico = ""
+    pdf.cell(col_widths_empenho[2], 6, val_eletronico, border=1, align='R')
+    
+    # Manual
+    try:
+        manual_val_emp = float(row['manual'])
+        val_manual = f"R$ {float(row['manual']):,.2f}".replace(",", "v").replace(".", ",").replace("v", ".") if manual_val_emp > 0 else ""
+    except (ValueError, TypeError):
+        val_manual = ""
+    pdf.cell(col_widths_empenho[3], 6, val_manual, border=1, align='R')
+    
+    # Total
+    #val_total = f"R$ {row['total']:,.2f}".replace(",", "v").replace(".", ",").replace("v", ".")
+    pdf.cell(col_widths_empenho[4], 6, " ", border=1, align='R')
+    
+    pdf.ln()
+
+# 16. Totais da seção Empenho
+pdf.ln(2)
+pdf.set_font("Arial", 'B', 8)
+pdf.set_x(x_inicio_empenho)
+
+# Calculando totais da seção Empenho
+total_empenho_eletronico = df_group_empenho["eletronico_calc"].sum()
+total_empenho_manual = df_group_empenho["manual_calc"].sum()
+total_empenho_geral = df_group_empenho["total"].sum()
+
+pdf.cell(col_widths_empenho[0] + col_widths_empenho[1], 6, "TOTAL GERAL", border=1, align='R')
+
+val_total_empenho_eletronico = f"R$ {total_empenho_eletronico:,.2f}".replace(",", "v").replace(".", ",").replace("v", ".")
+val_total_empenho_manual = f"R$ {total_empenho_manual:,.2f}".replace(",", "v").replace(".", ",").replace("v", ".")
+val_total_empenho_geral = f"R$ {total_empenho_geral:,.2f}".replace(",", "v").replace(".", ",").replace("v", ".")
+
+pdf.cell(col_widths_empenho[2], 6, val_total_empenho_eletronico, border=1, align='R')
+pdf.cell(col_widths_empenho[3], 6, val_total_empenho_manual, border=1, align='R')
+pdf.cell(col_widths_empenho[4], 6, val_total_empenho_geral, border=1, align='R')
 
 # 11. Seção 2: Resumo por G.E.F.
 pdf.ln(8)
@@ -276,21 +351,23 @@ for _, row in df_group_gef.iterrows():
     
     # Eletrônico
     try:
-        val_eletronico = f"R$ {float(row['eletronico']):,.2f}".replace(",", "v").replace(".", ",").replace("v", ".")
+        eletronico_val_gef = float(row['eletronico'])
+        val_eletronico = f"R$ {float(row['eletronico']):,.2f}".replace(",", "v").replace(".", ",").replace("v", ".") if eletronico_val_gef > 0 else ""
     except (ValueError, TypeError):
-        val_eletronico = "R$ 0,00"
+        val_eletronico = ""
     pdf.cell(col_widths_gef[1], 6, val_eletronico, border=1, align='R')
     
     # Manual
     try:
-        val_manual = f"R$ {float(row['manual']):,.2f}".replace(",", "v").replace(".", ",").replace("v", ".")
+        manual_val_gef = float(row['manual'])
+        val_manual = f"R$ {float(row['manual']):,.2f}".replace(",", "v").replace(".", ",").replace("v", ".") if manual_val_gef > 0 else ""
     except (ValueError, TypeError):
-        val_manual = "R$ 0,00"
+        val_manual = ""
     pdf.cell(col_widths_gef[2], 6, val_manual, border=1, align='R')
     
     # Total
-    val_total = f"R$ {row['total']:,.2f}".replace(",", "v").replace(".", ",").replace("v", ".")
-    pdf.cell(col_widths_gef[3], 6, val_total, border=1, align='R')
+    #val_total = f"R$ {row['total']:,.2f}".replace(",", "v").replace(".", ",").replace("v", ".")
+    pdf.cell(col_widths_gef[3], 6, " ", border=1, align='R')
     
     pdf.ln()
 
@@ -314,81 +391,12 @@ pdf.cell(col_widths_gef[1], 6, val_total_gef_eletronico, border=1, align='R')
 pdf.cell(col_widths_gef[2], 6, val_total_gef_manual, border=1, align='R')
 pdf.cell(col_widths_gef[3], 6, val_total_gef_geral, border=1, align='R')
 
-# 14. NOVA SEÇÃO: Resumo por Empenho
-pdf.ln(8)
-pdf.add_section_title("RESUMO POR EMPENHO")
-
-# Verificar se precisa de nova página para a seção Empenho
-if pdf.get_y() > 180:  # Deixar espaço suficiente para a nova seção
-    pdf.add_page()
-    pdf.add_section_title("RESUMO POR EMPENHO")
-
-pdf.add_empenho_table_header()
-
-# 15. Conteúdo da tabela de Empenho
-pdf.set_font("Arial", '', 8)
-for _, row in df_group_empenho.iterrows():
-    # Verificar se precisa de nova página
-    if pdf.get_y() > 250:
-        pdf.add_page()
-        pdf.add_empenho_table_header()
-    
-    pdf.set_x(x_inicio_empenho)
-    
-    # Empenho (truncar se muito longo)
-    empenho_text = str(row['empenho'])[:20] + "..." if len(str(row['empenho'])) > 20 else str(row['empenho'])
-    pdf.cell(col_widths_empenho[0], 6, empenho_text, border=1, align='L')
-    
-    # G.E.F. (truncar se muito longo)
-    gef_text = str(row['G.E.F.'])[:20] + "..." if len(str(row['G.E.F.'])) > 20 else str(row['G.E.F.'])
-    pdf.cell(col_widths_empenho[1], 6, gef_text, border=1, align='L')
-    
-    # Eletrônico
-    try:
-        val_eletronico = f"R$ {float(row['eletronico']):,.2f}".replace(",", "v").replace(".", ",").replace("v", ".")
-    except (ValueError, TypeError):
-        val_eletronico = "R$ 0,00"
-    pdf.cell(col_widths_empenho[2], 6, val_eletronico, border=1, align='R')
-    
-    # Manual
-    try:
-        val_manual = f"R$ {float(row['manual']):,.2f}".replace(",", "v").replace(".", ",").replace("v", ".")
-    except (ValueError, TypeError):
-        val_manual = "R$ 0,00"
-    pdf.cell(col_widths_empenho[3], 6, val_manual, border=1, align='R')
-    
-    # Total
-    val_total = f"R$ {row['total']:,.2f}".replace(",", "v").replace(".", ",").replace("v", ".")
-    pdf.cell(col_widths_empenho[4], 6, val_total, border=1, align='R')
-    
-    pdf.ln()
-
-# 16. Totais da seção Empenho
-pdf.ln(2)
-pdf.set_font("Arial", 'B', 8)
-pdf.set_x(x_inicio_empenho)
-
-# Calculando totais da seção Empenho
-total_empenho_eletronico = df_group_empenho["eletronico_calc"].sum()
-total_empenho_manual = df_group_empenho["manual_calc"].sum()
-total_empenho_geral = df_group_empenho["total"].sum()
-
-pdf.cell(col_widths_empenho[0] + col_widths_empenho[1], 6, "TOTAL GERAL", border=1, align='R')
-
-val_total_empenho_eletronico = f"R$ {total_empenho_eletronico:,.2f}".replace(",", "v").replace(".", ",").replace("v", ".")
-val_total_empenho_manual = f"R$ {total_empenho_manual:,.2f}".replace(",", "v").replace(".", ",").replace("v", ".")
-val_total_empenho_geral = f"R$ {total_empenho_geral:,.2f}".replace(",", "v").replace(".", ",").replace("v", ".")
-
-pdf.cell(col_widths_empenho[2], 6, val_total_empenho_eletronico, border=1, align='R')
-pdf.cell(col_widths_empenho[3], 6, val_total_empenho_manual, border=1, align='R')
-pdf.cell(col_widths_empenho[4], 6, val_total_empenho_geral, border=1, align='R')
-
 # 17. Salvar PDF
-output_path = r"\home\ubuntu\inpasa-pagamentos\detalhamento_pagamentos.pdf"
+output_path = "/home/ubuntu/inpasa-pagamentos/detalhamento_pagamentos.pdf"
 pdf.output(output_path)
 
 # 18. Enviar para o Git (opcional)
-repo_dir = r"\home\ubuntu\inpasa-pagamentos"
+repo_dir = "/home/ubuntu/inpasa-pagamentos"
 try:
     # Descomente para usar
     repo = Repo(repo_dir)
