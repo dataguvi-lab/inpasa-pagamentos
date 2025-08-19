@@ -2,7 +2,7 @@ QUERY_PAGAMENTO = """with valores as (
 	SELECT 
     dp.fornecedor,
     REGEXP_REPLACE(dp.empresa, '^.*INPASA[ ]*', '') AS "G.E.F.",
-    SUM(dp.valorparcela) AS eletronico,
+    SUM(dp.vl_liquido) AS eletronico,
     NULL AS manual,
     1 AS tipo_ordem
 FROM financeiro.detalhamento_pagamento dp
@@ -14,7 +14,7 @@ SELECT
     dp.fornecedor,
     REGEXP_REPLACE(dp.empresa, '^.*INPASA[ ]*', '') AS "G.E.F.",
     NULL AS eletronico,
-    SUM(dp.valorparcela) AS manual,
+    SUM(dp.vl_liquido) AS manual,
     2 AS tipo_ordem
 FROM financeiro.detalhamento_pagamento dp
 WHERE dp.datavcto = CURRENT_DATE
@@ -31,7 +31,7 @@ QUERY_GROUP_GEF = """with valores as (
 	SELECT 
     dp.fornecedor,
     REGEXP_REPLACE(dp.empresa, '^.*INPASA[ ]*', '') AS "G.E.F.",
-    SUM(dp.valorparcela) AS eletronico,
+    SUM(dp.vl_liquido) AS eletronico,
     NULL AS manual,
     1 AS tipo_ordem
 FROM financeiro.detalhamento_pagamento dp
@@ -43,7 +43,7 @@ SELECT
     dp.fornecedor,
     REGEXP_REPLACE(dp.empresa, '^.*INPASA[ ]*', '') AS "G.E.F.",
     NULL AS eletronico,
-    SUM(dp.valorparcela) AS manual,
+    SUM(dp.vl_liquido) AS manual,
     2 AS tipo_ordem
 FROM financeiro.detalhamento_pagamento dp
 WHERE dp.datavcto = CURRENT_DATE
@@ -58,7 +58,7 @@ QUERY_GROUP_EMPENHO = """with valores as (
 	SELECT 
     --dp.fornecedor,
     REGEXP_REPLACE(dp.empresa, '^.*INPASA[ ]*', '') AS "G.E.F.",
-    SUM(dp.valorparcela) AS eletronico,
+    SUM(dp.vl_liquido) AS eletronico,
     NULL AS manual,
     1 AS tipo_ordem,
     empenho
@@ -71,7 +71,7 @@ SELECT
     --dp.fornecedor,
     REGEXP_REPLACE(dp.empresa, '^.*INPASA[ ]*', '') AS "G.E.F.",
     NULL AS eletronico,
-    SUM(dp.valorparcela) AS manual,
+    SUM(dp.vl_liquido) AS manual,
     2 AS tipo_ordem,
     empenho
 FROM financeiro.detalhamento_pagamento dp
